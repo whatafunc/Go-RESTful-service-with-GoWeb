@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -38,6 +39,32 @@ var (
 	filesStatus = make(map[string]string)
 	statusMutex sync.Mutex
 )
+
+// requireAuth is a middleware function that checks for a valid Authorization header.
+func requireAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get the Authorization header
+		authHeader := r.Header.Get("Authorization")
+
+		// Check if the Authorization header is present and valid
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Extract the token (you can add more validation logic here)
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+
+		// Validate the token (this is just a placeholder, implement actual token validation)
+		if token != "mytoken123" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Call the next handler if authenticated
+		next.ServeHTTP(w, r)
+	})
+}
 
 /*
 files upload processor: gets POSTed file and writes it into Uploads dir
@@ -324,13 +351,19 @@ func main() {
 
 	log.Print("Goweb 2")
 	log.Print("by Mat Ryer and Tyler Bunnell")
-	log.Print("Customized for Gramercy Tech by Dmitriy I. ")
+	log.Print("removed some functionality just for github demo purposes by Dmitriy I. ")
 	log.Print("Starting Goweb powered server...")
+
+	// Define RESTful API handler
+	handler := goweb.DefaultHttpHandler()
+
+	// Wrap the handler with the requireAuth middleware
+	protectedHandler := requireAuth(handler)
 
 	// make a http server using the goweb.DefaultHttpHandler()
 	s := &http.Server{
 		Addr:           Address,
-		Handler:        goweb.DefaultHttpHandler(),
+		Handler:        protectedHandler,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

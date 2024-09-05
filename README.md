@@ -22,6 +22,29 @@ Content-Type: text/plain; charset=utf-8
 Hello from GOLANG
 ```
 
+Note: the iOS dev needs to implement authorisation with Bearer token since auth header is now implemented as planned:
+```
+curl -i -X GET localhost:9090
+HTTP/1.1 401 Unauthorized
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+Date: Thu, 05 Sep 2024 08:53:12 GMT
+Content-Length: 13
+
+Unauthorized
+```
+but sending auth token to API server gives OK, see example:
+```
+curl -i -X GET localhost:9090 -H "Authorization: Bearer mytoken123"
+HTTP/1.1 200 OK
+X-Custom-Header: Goweb
+Date: Thu, 05 Sep 2024 08:58:07 GMT
+Content-Length: 17
+Content-Type: text/plain; charset=utf-8
+
+Hello from GOLANG
+```
+
 step 2 (after we get “hello world” working), will be iOS sending a input.txt to  Server2.exe
 test: 
 ```
@@ -67,3 +90,7 @@ API?
 OK?
 - do you need docker-compose to be provided or just Golang code?
 - do you need any Unit tests done?
+
+Credits to GoWeb framework used:
+There are others but this one was one of first and is still good.
+Using the GoWeb framework in this a Go RESTful app just like my demo taken out of the production app, is indeed a great example. The framework provides predefined patterns, utilities, and tools that streamline the development process, much like how boilerplate code serves as a foundation to build upon quickly.
